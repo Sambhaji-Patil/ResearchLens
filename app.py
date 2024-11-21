@@ -5,13 +5,15 @@ from werkzeug.utils import secure_filename
 import fitz  # PyMuPDF for PDF text extraction
 import openai
 import re  # Ensure this is imported at the top
+from dotenv import load_dotenv
 
+load_dotenv()
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
 # Set OpenAI API Key
-openai.api_key = ""
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Store chat history
 chat_history = []
