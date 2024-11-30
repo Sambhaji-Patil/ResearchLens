@@ -13,37 +13,40 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3  # Using the latest stable version of actions/checkout
+      - uses: actions/checkout@v3
 
-      - name: Restore Cache
-        id: restore_cache
-        uses: actions/cache@v3  # Using the latest stable version of actions/cache
+      # Download the cursor file artifact (if it exists)
+      - name: Download Cursor Artifact
+        uses: actions/artifact@v3
         with:
-          path: .github/cache
-          key: cursor-cache-${{ github.sha }}  # Unique key based on commit SHA to prevent caching issues
-          restore-keys: |
-            cursor-cache-
+          name: cursor-file
+        continue-on-error: true  # Continue even if artifact is not found (first run)
 
+      # Ensure the cursor file exists
       - name: Get Latest Cursor
         run: |
           mkdir -p .github/cache
           if [ ! -f ".github/cache/last_cursor.txt" ]; then
             echo "No previous cursor found. Starting fresh."
-            touch .github/cache/last_cursor.txt
+            echo "0" > .github/cache/last_cursor.txt  # Initialize with 0 or an appropriate start value
           fi
 
+      # Spam detection step
       - name: Spam Detection
-        uses: Sambhaji-Patil/Auto-Hide-Spam-Comments@v1.2  # Release version 1.2 of your custom action
+        uses: Sambhaji-Patil/Auto-Hide-Spam-Comments@v1.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CURSOR_FILE: .github/cache/last_cursor.txt
 
-      - name: Remove Old Cache
-        run: |
-          rm -rf .github/cache
-
+      # Save the new cursor (modify based on spam detection output)
       - name: Save New Cursor
-        uses: actions/cache@v3  # Using the latest stable version of actions/cache
+        run: |
+          # Here, you should replace the cursor value based on your spam detection logic.
+          echo "NEW_CURSOR_VALUE" > .github/cache/last_cursor.txt
+
+      # Upload the updated cursor file as an artifact
+      - name: Upload Cursor Artifact
+        uses: actions/artifact@v3
         with:
-          path: .github/cache
-          key: cursor-cache-${{ github.sha }}  # Unique key based on commit SHA for caching the new state
+          name: cursor-file
+          path: .github/cache/last_cursor.txt
