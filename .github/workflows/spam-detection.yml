@@ -1,8 +1,6 @@
 name: Spam Detection
-
 on:
   workflow_dispatch:
-
 jobs:
   detect-spam:
     runs-on: ubuntu-latest
@@ -10,43 +8,10 @@ jobs:
       issues: write
       pull-requests: write
       discussions: write
-      contents: read
-
+      contents: read 
     steps:
-      - uses: actions/checkout@v3
-
-      # Download the cursor file artifact (if it exists)
-      - name: Download Cursor Artifact
-        uses: actions/artifact@v3
-        with:
-          name: cursor-file
-        continue-on-error: true  # Continue even if artifact is not found (first run)
-
-      # Ensure the cursor file exists
-      - name: Get Latest Cursor
-        run: |
-          mkdir -p .github/cache
-          if [ ! -f ".github/cache/last_cursor.txt" ]; then
-            echo "No previous cursor found. Starting fresh."
-            echo "0" > .github/cache/last_cursor.txt  # Initialize with 0 or an appropriate start value
-          fi
-
-      # Spam detection step
+      - uses: actions/checkout@v3  
       - name: Spam Detection
-        uses: Sambhaji-Patil/Auto-Hide-Spam-Comments@v1.2
+        uses: Sambhaji-Patil/Auto-Hide-Spam-Comments@v1.2 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CURSOR_FILE: .github/cache/last_cursor.txt
-
-      # Save the new cursor (modify based on spam detection output)
-      - name: Save New Cursor
-        run: |
-          # Here, you should replace the cursor value based on your spam detection logic.
-          echo "NEW_CURSOR_VALUE" > .github/cache/last_cursor.txt
-
-      # Upload the updated cursor file as an artifact
-      - name: Upload Cursor Artifact
-        uses: actions/artifact@v3
-        with:
-          name: cursor-file
-          path: .github/cache/last_cursor.txt
