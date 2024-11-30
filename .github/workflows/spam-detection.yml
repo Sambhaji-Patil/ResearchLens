@@ -10,16 +10,17 @@ jobs:
       issues: write
       pull-requests: write
       discussions: write
-      contents: read 
+      contents: read
 
     steps:
-      - uses: actions/checkout@v3  
+      - uses: actions/checkout@v3  # Using the latest stable version of actions/checkout
 
       - name: Restore Cache
-        uses: actions/cache@v3
+        id: restore_cache
+        uses: actions/cache@v3  # Using the latest stable version of actions/cache
         with:
           path: .github/cache
-          key: cursor-cache
+          key: cursor-cache-${{ github.sha }}  # Unique key based on commit SHA to prevent caching issues
           restore-keys: |
             cursor-cache-
 
@@ -32,14 +33,17 @@ jobs:
           fi
 
       - name: Spam Detection
-        uses: Sambhaji-Patil/Auto-Hide-Spam-Comments@v1.2 
+        uses: Sambhaji-Patil/Auto-Hide-Spam-Comments@v1.2  # Release version 1.2 of your custom action
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CURSOR_FILE: .github/cache/last_cursor.txt
 
-      - name: Save Cache
-        uses: actions/cache@v3
+      - name: Remove Old Cache
+        run: |
+          rm -rf .github/cache
+
+      - name: Save New Cursor
+        uses: actions/cache@v3  # Using the latest stable version of actions/cache
         with:
           path: .github/cache
-          key: cursor-cache
-
+          key: cursor-cache-${{ github.sha }}  # Unique key based on commit SHA for caching the new state
